@@ -3,7 +3,7 @@ pipeline {
 // Retention policy to dictate jenkins to keep 2 log and keep 1 artifact
 // pay attention to the syntax, that is camel case in numToKeepStr
   options{
-    buildDiscarder(logRotator(numToKeepStr:'2', artifactnumToKeepStr: '1'))
+    buildDiscarder(logRotator(numToKeepStr:'2', artifactNumToKeepStr: '1'))
   }
 
   stages {
