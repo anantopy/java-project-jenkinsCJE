@@ -6,33 +6,41 @@ pipeline {
 
   stages {
     stage ('Unit Tests') {
+      agent {
+        // master node with apache label
+        label 'apache'
+      }
       steps {
-        agent {
-          // master node with apache label
-          label 'apache'
-        }
         sh 'ant -f test.xml -v'
         junit 'reports/result.xml'
       }
     }
+
     stage('build') {
+      agent {
+        // master node with apache label
+        label 'apache'
+      }
       steps {
-        agent {
-          // master node with apache label
-          label 'apache'
-        }
         sh 'ant -f build.xml -v'
       }
-    }
-    stage('deploy') {
-      steps {
-        agent {
-          // master node with apache label
-          label 'apache'
+      post {
+        success {
+          archiveArtifacts artifacts: 'dist/*.jar', fingerprint: true
         }
+      }
+    }
+
+    stage('deploy') {
+      agent {
+        // master node with apache label
+        label 'apache'
+      }
+      steps {
         sh "cp dist/rectangle_${env.BUILD_NUMBER}.jar /var/www/html/rectangles/all"
       }
     }
+
     stage("Running on Centos") {
       agent {
         // master node with apache label
@@ -45,9 +53,5 @@ pipeline {
     }
   }
 
-  post {
-    always {
-      archiveArtifacts artifacts: 'dist/*.jar', fingerprint: true
-    }
-  }
+
 }
