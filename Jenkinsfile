@@ -1,4 +1,4 @@
-/pipeline {
+pipeline {
 // make the whole pipeline run in the master node as it has apache installed and configured
 //Also make sure the Jenkins master has label set as 'master'
 // Sperate agent on different stages:
