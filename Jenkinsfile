@@ -3,6 +3,9 @@ pipeline {
 //Also make sure the Jenkins master has label set as 'master'
 // Sperate agent on different stages:
   agent none
+  environment {
+    MAJOR_VERSION = 1
+  }
 
   stages {
     stage ('Unit Tests') {
@@ -38,7 +41,7 @@ pipeline {
       }
       steps {
         sh "mkdir /var/www/html/rectangles/all/${env.BRANCH_NAME}"
-        sh "cp dist/rectangle_${env.BUILD_NUMBER}.jar /var/www/html/rectangles/all/${env.BRANCH_NAME}/"
+        sh "cp dist/rectangle_${env.MAJOR_VERSION}.${env.BUILD_NUMBER}.jar /var/www/html/rectangles/all/${env.BRANCH_NAME}/"
       }
     }
 
@@ -48,8 +51,8 @@ pipeline {
         label 'Centos'
       }
       steps {
-        sh "wget http://fishereatworld3.mylabserver.com/rectangles/all/${env.BRANCH_NAME}/rectangle_${env.BUILD_NUMBER}.jar"
-        sh "java -jar rectangle_${env.BUILD_NUMBER}.jar 3 4"
+        sh "wget http://fishereatworld3.mylabserver.com/rectangles/all/${env.BRANCH_NAME}/rectangle_${env.MAJOR_VERSION}.${env.BUILD_NUMBER}.jar"
+        sh "java -jar rectangle_${env.MAJOR_VERSION}.${env.BUILD_NUMBER}.jar 3 4"
       }
     }
     // adding a docker debian agent for functional testing
@@ -58,8 +61,8 @@ pipeline {
         docker 'openjdk:8u151-jre'
       }
       steps {
-        sh "wget http://fishereatworld3.mylabserver.com/rectangles/all/${env.BRANCH_NAME}/rectangle_${env.BUILD_NUMBER}.jar"
-        sh "java -jar rectangle_${env.BUILD_NUMBER}.jar 3 4"
+        sh "wget http://fishereatworld3.mylabserver.com/rectangles/all/${env.BRANCH_NAME}/rectangle_${env.MAJOR_VERSION}.${env.BUILD_NUMBER}.jar"
+        sh "java -jar rectangle_${env.MAJOR_VERSION}.${env.BUILD_NUMBER}.jar 3 4"
       }
     }
     //Move the jar file to green folder
@@ -72,7 +75,7 @@ pipeline {
         branch 'master'
       }
       steps {
-        sh "cp /var/www/html/rectangles/all/${env.BRANCH_NAME}/rectangle_${env.BUILD_NUMBER}.jar /var/www/html/rectangles/green/rectangle_${env.BUILD_NUMBER}.jar"
+        sh "cp /var/www/html/rectangles/all/${env.BRANCH_NAME}/rectangle_${env.MAJOR_VERSION}.${env.BUILD_NUMBER}.jar /var/www/html/rectangles/green/rectangle_${env.MAJOR_VERSION}.${env.BUILD_NUMBER}.jar"
       }
     }
 
@@ -96,6 +99,9 @@ pipeline {
         sh "git merge development"
         echo "pushing to origin master"
         sh "git push origin master"
+        echo "Tagging the associate Application Release"
+        sh "git tag rectangle-${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
+        sh "git push origin rectangle-${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
       }
     }
   }
