@@ -37,7 +37,8 @@ pipeline {
         label 'apache'
       }
       steps {
-        sh "cp dist/rectangle_${env.BUILD_NUMBER}.jar /var/www/html/rectangles/all"
+        sh "mkdir /var/www/html/rectangles/all/${env.BRANCH_NAME}"
+        sh "cp dist/rectangle_${env.BUILD_NUMBER}.jar /var/www/html/rectangles/all/${env.BRANCH_NAME}/"
       }
     }
 
@@ -47,7 +48,7 @@ pipeline {
         label 'Centos'
       }
       steps {
-        sh "wget http://fishereatworld3.mylabserver.com/rectangles/all/rectangle_${env.BUILD_NUMBER}.jar"
+        sh "wget http://fishereatworld3.mylabserver.com/rectangles/all/${env.BRANCH_NAME}/rectangle_${env.BUILD_NUMBER}.jar"
         sh "java -jar rectangle_${env.BUILD_NUMBER}.jar 3 4"
       }
     }
@@ -57,20 +58,46 @@ pipeline {
         docker 'openjdk:8u151-jre'
       }
       steps {
-        sh "wget http://fishereatworld3.mylabserver.com/rectangles/all/rectangle_${env.BUILD_NUMBER}.jar"
+        sh "wget http://fishereatworld3.mylabserver.com/rectangles/all/${env.BRANCH_NAME}/rectangle_${env.BUILD_NUMBER}.jar"
         sh "java -jar rectangle_${env.BUILD_NUMBER}.jar 3 4"
       }
     }
-    // comment:automate the promation process
+    //Move the jar file to green folder
     stage('Promote to Green') {
       agent {
         label 'apache'
       }
+      //Execute the stage when the branch being built matches 'master'
+      when {
+        branch 'master'
+      }
       steps {
-        sh "cp /var/www/html/rectangles/all/rectangle_${env.BUILD_NUMBER}.jar /var/www/html/rectangles/green/rectangle_${env.BUILD_NUMBER}.jar"
+        sh "cp /var/www/html/rectangles/all/${env.BRANCH_NAME}/rectangle_${env.BUILD_NUMBER}.jar /var/www/html/rectangles/green/rectangle_${env.BUILD_NUMBER}.jar"
+      }
+    }
+
+    // comment:automate the code promation process
+    stage('Prmote development branch to master') {
+      agent {
+        label 'apache'
+      }
+      //Execute the stage when the branch being built matches 'development'
+      when {
+        branch 'development'
+      }
+      steps {
+        echo "Stashing any local changes"
+        sh "git stash"
+        echo "Checking Out development"
+        sh "git checkout development"
+        echo "Checking out the master branch"
+        sh "git checkout master"
+        echo "Merging development into master branch"
+        sh "git merge development"
+        echo "pushing to origin master"
+        sh "git push origin master"
       }
 
-    }
   }
 
 
