@@ -119,7 +119,7 @@ pipeline {
   post {
     failure {
       emailext (
-        subject: "${env.JOB_NAME} [${env.BUILD_NUMBER}]  Failed !"
+        subject: "${env.JOB_NAME} [${env.BUILD_NUMBER}]  Failed !", // pay attention to the comma at the end
         body: """<p>'${env.JOB_NAME} [${env.BUILD_NUMBER}]' The build job Failed!":</p>
         <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
         to: "unisahss@hotmail.com"
